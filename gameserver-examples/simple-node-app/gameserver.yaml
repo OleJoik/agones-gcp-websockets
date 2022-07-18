@@ -1,0 +1,26 @@
+# gameserver.yaml
+# https://agones.dev/site/docs/reference/gameserver/
+# annotations: https://github.com/Octops/gameserver-ingress-controller
+
+apiVersion: "agones.dev/v1"
+kind: GameServer
+metadata:
+  generateName: "simple-node-app-"
+  annotations: 
+    octops-kubernetes.io/ingress.class: "contour" 
+    octops-projectcontour.io/websocket-routes: "/" 
+    octops.io/gameserver-ingress-mode: "domain"
+    octops.io/gameserver-ingress-domain: "[yourdomain.com]" 
+    octops.io/terminate-tls: "false"
+    octops.io/tls-secret-name: "wildcard-cert"
+spec:
+  ports:
+    - name: default
+      portPolicy: Dynamic
+      containerPort: 7654
+      protocol: TCP
+  template:
+    spec:
+      containers:
+      - name: simple-node-app
+        image: [eu.]gcr.io/[GCP-PROJECT]/simple-node-app

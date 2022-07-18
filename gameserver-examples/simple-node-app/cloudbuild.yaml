@@ -1,0 +1,9 @@
+# cloudbuild.yaml
+
+steps:
+# Build the container image
+- name: 'gcr.io/cloud-builders/docker'
+  args: ['build', '-t', '[eu.]gcr.io/[GCP-PROJECT]/simple-node-app:latest', '.']
+# Push the container image to Container Registry
+- name: 'gcr.io/cloud-builders/docker'
+  args: ['push', '[eu.]gcr.io/[GCP-PROJECT]/simple-node-app:latest']

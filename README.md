@@ -71,15 +71,6 @@ Follow [official documentation](https://agones.dev/site/docs/installation/instal
 ### [TODO] Configuration
 Look into ways to reduce resource consumption ([Gameserver and sidecar configuration](https://agones.dev/site/docs/advanced/limiting-resources/#sdk-gameserver-sidecar))
 
-
-### Local development
-You can also run agones locally - [download the SDK](https://agones.dev/site/docs/guides/client-sdks/local/). This enables running the Agones processes locally in a terminal alongside your game servers in development. 
-
-for windows:
-```
-sdk-server.windows.amd64.exe --local
-``` 
-
 ## Octops Gameserver Ingress Controller
 By default Agones creates game servers, and exposes their IP and Ports to clients. However, the IP:Port combination <b>can not be used</b> to issue SSL certificates, one needs a hostname (such as *www.domain.com*) for that. A server able to terminate ("decrypt") SSL certificates are however mandatory if used by a modern web client secured with SSL. The communication has to be secure, otherwise the browser will block it.
 
@@ -423,12 +414,47 @@ And now, the steps in detail:
 
     Additionally, we have set up a wildcard DNS pointing to the contour load balancer.
          
-    
-    <br>
 
-    ## !! COMING SOON !! - Create a gameserver
-    **Next step: Create a gameserver!**
+# Create a gameserver
 
 
+Now you can create a gameserver or a fleet using Octops annotations on the yaml file. To configure the ingress to use your newly created wildcard certificate, supply the secret name `octops.io/tls-secret-name` and set `octops.io/terminate-tls` to `"false"` Octops will automatically generate an ingress with tls configured, and you get an unique subdomain for your server.
 
+`kubectl get ingress` 
+
+You can look at some of our simple websocket example gameservers in [this folder](gameserver-examples/):
+
+[TODO] Add more game server examples
+- [NodeJS example](gameserver-examples/simple-node-app/)
+
+`kubectl create -f gameserver.yaml` 
+
+```yaml
+# gameserver.yaml
+# https://agones.dev/site/docs/reference/gameserver/
+# annotations: https://github.com/Octops/gameserver-ingress-controller
+
+apiVersion: "agones.dev/v1"
+kind: GameServer
+metadata:
+  generateName: "simple-node-app-"
+  annotations: 
+    octops-kubernetes.io/ingress.class: "contour" 
+    octops-projectcontour.io/websocket-routes: "/" 
+    octops.io/gameserver-ingress-mode: "domain"
+    octops.io/gameserver-ingress-domain: "[yourdomain.com]" 
+    octops.io/terminate-tls: "false"
+    octops.io/tls-secret-name: "wildcard-cert"
+spec:
+  ports:
+    - name: default
+      portPolicy: Dynamic
+      containerPort: 7654
+      protocol: TCP
+  template:
+    spec:
+      containers:
+      - name: simple-node-app
+        image: [eu.]gcr.io/[GCP-PROJECT]/simple-node-app
+```
     
