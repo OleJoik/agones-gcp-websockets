@@ -416,7 +416,7 @@ And now, the steps in detail:
     ## Recap
     Our cluster is now configured with the following components
     - Agones - to orchestrate game servers
-    - OctOpts gameserver ingress controller - to manage ingress for gameservers, using...
+    - Octops gameserver ingress controller - to manage ingress for gameservers, using...
         - cert-manager, to manage and automatically renew a wildcard certificate 
         - Contour ingress controller - as a reverse proxy
 
