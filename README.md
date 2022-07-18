@@ -133,13 +133,10 @@ kubectl apply -f octops-gameserver-controller/modified-install.yaml
 [cert-manager](https://cert-manager.io/) helps you create and manage free TLS certificates for use in kubernetes. This is a versatile tool that can be used in many ways. For our setup, we need a wildcard certificate that applies to the subdomains exposed by the Octops ingress controller, for example ***gameserver-1.yourdomain.com***. The wildcard certificate can secure all subdomains of your host, ****.yourdomain.com***. The [cert-manager docs](https://cert-manager.io/docs/tutorials/acme/dns-validation/#issuing-an-acme-certificate-using-dns-validation) describe how to obtain such a certificate. An important note is that you need to have a provider from the [list of supported DNS providers](https://cert-manager.io/docs/configuration/acme/dns01/#supported-dns01-providers) (for example GoogleDNS) to be able to obtain a wildcard certificate.
 
 I used the following steps to getting a certificate, described in detail the following sections.
-- Obtain a domain at googledomains
-- Manage the DNS with [GoogleDNS](https://console.cloud.google.com/net-services/dns/zones)
-- Install cert-manager
-- Create a service account with access to Google CloudDNS
-- Obtain a service account key in kubernetes secrets
-- Create a kubernetes certificate issuer with access to the service account
-- Create a kubernetes TLS certificate with the issuer
+1. Obtain a domain at googledomains
+2. Manage the DNS with [GoogleDNS](https://console.cloud.google.com/net-services/dns/zones)
+3. Install cert-manager
+4. Obtain a certificate for *.yourdomain.com
 
 
 ### [TODO] Describe - Set up a domain at GoogleDNS
@@ -413,7 +410,7 @@ And now, the steps in detail:
     kubectl -n projectcontour get svc
     ``` 
 
-    ... and add the a **wildcard DNS A-record** pointing to the IP-address at the [GoogleDNS](https://console.cloud.google.com/net-services/dns/zones).
+    ... and add a **wildcard DNS A-record** pointing to the IP-address at  [GoogleDNS](https://console.cloud.google.com/net-services/dns/zones).
     
 
     ## Recap
