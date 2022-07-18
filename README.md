@@ -4,9 +4,9 @@ A demo repository to show how one can set up a Kubernetes cluster in google clou
 # Introduction
 The main open source-components of the kubernetes cluster setup is as follows:
 
-[Agones](https://agones.dev/site/) is used to host, run and scale dedicated game servers in kubernetes. [OctOps Gameserver Ingress Controller](https://github.com/Octops/gameserver-ingress-controller) is used create and manage ingress resources automatically for every game server. It wires this up to a reverse proxy and TLS certificate manager, which facilitates secure websocket connections from clients to webservers.
+[Agones](https://agones.dev/site/) is used to host, run and scale dedicated game servers in kubernetes. [Octops Gameserver Ingress Controller](https://github.com/Octops/gameserver-ingress-controller) is used create and manage ingress resources automatically for every game server. It wires this up to a reverse proxy and TLS certificate manager, which facilitates secure websocket connections from clients to webservers.
 
-OctOps is using [cert-manager](https://cert-manager.io/docs/) to manage certificates, and [Contour](https://projectcontour.io/) ingress controller under the hood. These need to be manually configured for the cluster as well.
+Octops is using [cert-manager](https://cert-manager.io/docs/) to manage certificates, and [Contour](https://projectcontour.io/) ingress controller under the hood. These need to be manually configured for the cluster as well.
 
 **Big thanks** are directed to the entirety of the open source community, supplying excellent tooling that is free to use.
 
@@ -16,7 +16,7 @@ OctOps is using [cert-manager](https://cert-manager.io/docs/) to manage certific
 - Prerequisites
 - Creating a kubernetes cluster in google cloud
 - Installing Agones
-- Installing OctOps gameserver ingress controller
+- Installing Octops gameserver ingress controller
     - Installing cert-manager
     - Installing Contour Ingress controller
 - [COMING SOON] Creating a websocket gameserver
@@ -63,13 +63,7 @@ gcloud container clusters create [CLUSTERNAME]
 | **Final cost** |  |  **$6.21** | 
 
 ### Firewall rules
-The [docs](https://agones.dev/site/docs/installation/creating-cluster/gke/#creating-the-firewall) suggest creating a firewall rule to open ports for udp-traffic. Web sockets are however transferred over tcp, so we need to slightly modify the firewall rules as such:
-```
-gcloud compute firewall-rules create game-server-firewall
-  --allow tcp:7000-8000
-  --target-tags game-server
-  --description "Firewall to allow game server tcp traffic"
-```
+The [docs](https://agones.dev/site/docs/installation/creating-cluster/gke/#creating-the-firewall) suggest creating a firewall rule to open ports for udp-traffic. It is however not necessary to open extra ports to your cluster with this configuration. Clients will connect to the cluster through ingress, at ports 80-443.
 
 ## Installing agones
 Follow [official documentation](https://agones.dev/site/docs/installation/install-agones/helm/) to install Agones into the cluster using Helm package manager for kubernetes
@@ -86,12 +80,12 @@ for windows:
 sdk-server.windows.amd64.exe --local
 ``` 
 
-## OctOps Gameserver Ingress Controller
-By default Agones creates game server pods with external kubernetes services (called LoadBalancers), exposing their IP and Port to clients. However, the IP:Port combination <b>can not be used</b> to issue SSL certificates, one needs a hostname (such as *www.domain.com*) for that. A server able to terminate ("decrypt") SSL certificates are however mandatory if used by a modern web client secured with SSL. The communication has to be secure, otherwise the browser will block it.
+## Octops Gameserver Ingress Controller
+By default Agones creates game servers, and exposes their IP and Ports to clients. However, the IP:Port combination <b>can not be used</b> to issue SSL certificates, one needs a hostname (such as *www.domain.com*) for that. A server able to terminate ("decrypt") SSL certificates are however mandatory if used by a modern web client secured with SSL. The communication has to be secure, otherwise the browser will block it.
 
-The [Game Server Ingress Controller](https://github.com/Octops/gameserver-ingress-controller) by [OctOps](https://octops.io/) remedies this problem by automating the creation of ingress components for every gameserver service created by Agones. The ingress gives a unique hostname (a subdomain of a domain you own, for example `gameserver-1.yourdomain.com`). Additionally it integrates with two other tools that need to be installed, [cert-manager](https://cert-manager.io/) and [Contour ingress controller](https://projectcontour.io/).
+The [Game Server Ingress Controller](https://github.com/Octops/gameserver-ingress-controller) by [Octops](https://octops.io/) remedies this problem by automating the creation of ingress components for every gameserver service created by Agones. The ingress gives a unique hostname (a subdomain of a domain you own, for example `gameserver-1.yourdomain.com`). Additionally it integrates with two other tools that need to be installed, [cert-manager](https://cert-manager.io/) and [Contour ingress controller](https://projectcontour.io/).
 
-### Configuring the OctOps controller
+### Configuring the Octops controller
 When installing the controller you can reduce the resource requirements of this component by modifying the [original yaml manifest](https://raw.githubusercontent.com/Octops/gameserver-ingress-controller/main/deploy/install.yaml) used when [installing](https://github.com/Octops/gameserver-ingress-controller#how-to-install-the-octops-controller) the controller.
 
 
@@ -125,18 +119,18 @@ spec:
               memory: "100Mi" # Reduced from 150Mi
           (...)
 ```
-### Installing the OctOps controller
+### Installing the Octops controller
 Visit the github repo of the gameserver ingress controller to read detailed documentation about how to use the tool.
 
 https://github.com/Octops/gameserver-ingress-controller
 
-Configure your install as shown above, check for updates from OctOps, and finally, install the controller:
+Configure your install as shown above, check for updates from Octops, and finally, install the controller:
 ```
 kubectl apply -f octops-gameserver-controller/modified-install.yaml
 ```
 
 ## cert-manager
-[cert-manager](https://cert-manager.io/) helps you create and manage free TLS certificates for websites in in agones. This is a versatile tool that can be used in many ways. For our setup, we need a wildcard certificate that applies to the subdomains exposed by the OctOps ingress controller, for example ***gameserver-1.yourdomain.com***. The wildcard certificate can secure all subdomains of your host, ****.yourdomain.com***. The [cert-manager docs](https://cert-manager.io/docs/tutorials/acme/dns-validation/#issuing-an-acme-certificate-using-dns-validation) describe how to obtain such a certificate. An important note is that you need to have a provider from the [list of supported DNS providers](https://cert-manager.io/docs/configuration/acme/dns01/#supported-dns01-providers) (for example GoogleDNS) to be able to obtain a wildcard certificate.
+[cert-manager](https://cert-manager.io/) helps you create and manage free TLS certificates for websites in in agones. This is a versatile tool that can be used in many ways. For our setup, we need a wildcard certificate that applies to the subdomains exposed by the Octops ingress controller, for example ***gameserver-1.yourdomain.com***. The wildcard certificate can secure all subdomains of your host, ****.yourdomain.com***. The [cert-manager docs](https://cert-manager.io/docs/tutorials/acme/dns-validation/#issuing-an-acme-certificate-using-dns-validation) describe how to obtain such a certificate. An important note is that you need to have a provider from the [list of supported DNS providers](https://cert-manager.io/docs/configuration/acme/dns01/#supported-dns01-providers) (for example GoogleDNS) to be able to obtain a wildcard certificate.
 
 I used the following steps to getting a certificate, described in detail the following sections.
 - Obtain a domain at googledomains
@@ -166,7 +160,14 @@ kubectl apply -f https://github.com/cert-manager/cert-manager/releases/download/
 The [cert-manager docs](https://cert-manager.io/docs/configuration/acme/dns01/google/) describe how to resolve DNS01 challenges when using Google CloudDNS to manage your DNS.
 
 These are the steps to obtain a certificate:
+1. Create a service accountand give it access to the following roles
+2. Download a json-serviceaccount key
+3. Create a kubernetes secret with serviceaccount key 
+4. Create an Issuer referencing the secret
+5. Create a kubernetes cert-manager certificate object
+6. A TLS certificate secret is created for you
 
+And now, the steps in detail:
 1. [Create a service account](https://console.cloud.google.com/iam-admin/serviceaccounts) and [give it access](https://console.cloud.google.com/iam-admin/iam) to the following roles:
         
     - EITHER: 
@@ -387,7 +388,7 @@ These are the steps to obtain a certificate:
     You can also verify the certificate with openssl. I will not describe how to do it here.
 
     ## Contour Ingress Controller
-    OctOps gameserver ingress controller is using [Contour Ingress Controller](https://projectcontour.io/) as a reverse proxy.
+    Octops gameserver ingress controller is using [Contour Ingress Controller](https://projectcontour.io/) as a reverse proxy.
 
 
     Follow the [official documentation](https://projectcontour.io/getting-started/#option-1-yaml) to install Contour using yaml.
@@ -404,7 +405,7 @@ These are the steps to obtain a certificate:
     - 2 Contour pods with each status Running and 1/1 Ready
     - 1+ Envoy pod(s), with each the status Running and 2/2 Ready
 
-    As Described in the [OctOps docs](https://github.com/Octops/gameserver-ingress-controller#requirements), we need to update our DNS information to point to the exposed (load balancer) service. 
+    As Described in the [Octops docs](https://github.com/Octops/gameserver-ingress-controller#requirements), we need to update our DNS information to point to the exposed (load balancer) service. 
     
     Find the IP by running...
 
