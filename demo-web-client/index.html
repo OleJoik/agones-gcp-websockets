@@ -80,9 +80,15 @@
         ">
         <li 
           class="list-group-item"
-          v-for="message in messages"
+          v-for="item in messages"
         >
-          {{ message }}
+          <span>
+            {{item.alias}}:
+          </span>
+          <br>
+          <span>
+            {{ item.message }}
+          </span>
         </li>
       </ul>
 

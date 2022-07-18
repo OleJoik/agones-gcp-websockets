@@ -8,9 +8,18 @@ const app = {
       alias: null,
       messageInput: null,
       messages: [
-        "Old message 1",
-        "Old message 2",
-        "Old message 3",
+        {
+          alias: "Ole",
+          message: "Old message 1 Lorem ipsum dolor sit amet, consectetur adipiscing elit. Proin justo purus, iaculis eu sagittis ultrices, bibendum ut diam. Sed augue tortor, sagittis eu mollis a, varius eget metus. In tincidunt auctor tortor. Phasellus sit amet consectetur libero. Nam viverra sollicitudin purus, in venenatis lectus. In arcu mi, congue nec posuere."
+        },
+        {
+          alias: "Henrik",
+          message: "Old message 2 Lorem ipsum dolor sit amet, consectetur adipiscing elit. Proin justo purus, iaculis eu sagittis ultrices, bibendum ut diam. Sed augue tortor, sagittis eu mollis a, varius eget metus. In tincidunt auctor tortor. Phasellus sit amet consectetur libero. Nam viverra sollicitudin purus, in venenatis lectus. In arcu mi, congue nec posuere."
+        },
+        {
+          alias: "Kåre",
+          message: "Old message 3 Lorem ipsum dolor sit amet, consectetur adipiscing elit. Proin justo purus, iaculis eu sagittis ultrices, bibendum ut diam. Sed augue tortor, sagittis eu mollis a, varius eget metus. In tincidunt auctor tortor. Phasellus sit amet consectetur libero. Nam viverra sollicitudin purus, in venenatis lectus. In arcu mi, congue nec posuere."
+        }
       ]
     }
   },
@@ -31,15 +40,30 @@ const app = {
     }
   },
   methods: {
-    connectClicked(){      
+    connectClicked(){
+      if(!this.connected) this.connect()
+      else this.disconnect();
+    },
+
+    connect(){
       if(!this.validateUrl()) return;
       if(!this.validateAlias()) return;
 
-      this.connected = !this.connected;
+      this.connected = true;
+    },
+
+    disconnect(){
+      this.messages = [];
+      this.alias = null;
+      this.url = null;
+      this.connected = false;
     },
 
     sendMessage(){
-      this.messages.push(this.messageInput);
+      this.messages.push({
+        alias: this.alias,
+        message: this.messageInput
+      });
       this.messageInput = null;
     },
 
