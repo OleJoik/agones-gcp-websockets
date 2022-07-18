@@ -83,10 +83,10 @@ sdk-server.windows.amd64.exe --local
 ## Octops Gameserver Ingress Controller
 By default Agones creates game servers, and exposes their IP and Ports to clients. However, the IP:Port combination <b>can not be used</b> to issue SSL certificates, one needs a hostname (such as *www.domain.com*) for that. A server able to terminate ("decrypt") SSL certificates are however mandatory if used by a modern web client secured with SSL. The communication has to be secure, otherwise the browser will block it.
 
-The [Game Server Ingress Controller](https://github.com/Octops/gameserver-ingress-controller) by [Octops](https://octops.io/) remedies this problem by automating the creation of ingress components for every gameserver service created by Agones. The ingress gives a unique hostname (a subdomain of a domain you own, for example `gameserver-1.yourdomain.com`). Additionally it integrates with two other tools that need to be installed, [cert-manager](https://cert-manager.io/) and [Contour ingress controller](https://projectcontour.io/).
+The [Game Server Ingress Controller](https://github.com/Octops/gameserver-ingress-controller) by [Octops](https://octops.io/) remedies this problem by automating the creation of ingress components for every gameserver created by Agones. The ingress can be configured to give a unique hostname (a subdomain of a domain you own, for example `gameserver-1.yourdomain.com`). Additionally it integrates with two other tools that need to be installed, [cert-manager](https://cert-manager.io/) and [Contour ingress controller](https://projectcontour.io/).
 
 ### Configuring the Octops controller
-When installing the controller you can reduce the resource requirements of this component by modifying the [original yaml manifest](https://raw.githubusercontent.com/Octops/gameserver-ingress-controller/main/deploy/install.yaml) used when [installing](https://github.com/Octops/gameserver-ingress-controller#how-to-install-the-octops-controller) the controller.
+You can reduce the resource requirements of this component by modifying the [original yaml manifest](https://raw.githubusercontent.com/Octops/gameserver-ingress-controller/main/deploy/install.yaml) used when [installing](https://github.com/Octops/gameserver-ingress-controller#how-to-install-the-octops-controller) the controller.
 
 
 My [modified install manifest](octops-gameserver-controller/modified-install.yaml)  is shown below:
