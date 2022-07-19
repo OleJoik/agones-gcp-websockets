@@ -6,7 +6,7 @@
     >
       <nav class="navbar bg-light">
         <div class="container-fluid">
-          <a class="navbar-brand" href="#" onClick="return false;">Vite Demo chat app</a>
+          <a class="navbar-brand" href="#" onClick="return false;">Demo chat app</a>
         </div>
       </nav>
 
