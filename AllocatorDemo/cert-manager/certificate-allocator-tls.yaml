@@ -1,0 +1,25 @@
+
+# certificate-allocator-tls.yaml
+# https://agones.dev/site/docs/advanced/allocator-service/
+
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: allocator-tls
+  namespace: agones-system
+spec:
+  commonName: ${EXTERNAL_IP} # kubectl get services agones-allocator -n agones-system
+  ipAddresses:
+    - ${EXTERNAL_IP}
+  secretName: allocator-tls
+  issuerRef:
+    name: selfsigned
+    kind: ClusterIssuer
+
+
+# The secret is here:
+# kubectl get secret allocator-tls -n agones-system
+# TLS_CA_VALUE=$(kubectl get secret allocator-tls -n agones-system -ojsonpath='{.data.ca\.crt}')
+
+# Add ca.crt to the allocator-tls-ca Secret
+# kubectl get secret allocator-tls-ca -o json -n agones-system | jq '.data["tls-ca.crt"]="'${TLS_CA_VALUE}'"' | kubectl apply -f -
