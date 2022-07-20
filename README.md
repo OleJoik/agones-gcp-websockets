@@ -458,3 +458,43 @@ spec:
         image: [eu.]gcr.io/[GCP-PROJECT]/simple-node-app
 ```
     
+# Create a Fleet
+
+This also works just fine when creating a gameserver fleet.
+
+Here is the [fleet manifest](gameserver-examples/simple-node-app/fleet.yaml) for simple-node-app:
+
+```yaml
+# fleet.yaml
+
+# Examples
+# https://agones.dev/site/docs/reference/fleet/
+# https://github.com/Octops/gameserver-ingress-controller/blob/main/examples/fleet-domain.yaml
+
+apiVersion: "agones.dev/v1"
+kind: Fleet
+metadata:
+  name: simple-node-app-fleet
+spec:
+  replicas: 4
+  template:
+    metadata:
+      annotations: 
+        octops-kubernetes.io/ingress.class: "contour" 
+        octops-projectcontour.io/websocket-routes: "/" 
+        octops.io/gameserver-ingress-mode: "domain"
+        octops.io/gameserver-ingress-domain: "[yourdomain.com]" 
+        octops.io/terminate-tls: "false"
+        octops.io/tls-secret-name: "wildcard-cert"
+    spec:
+      ports:
+      - name: default
+        portPolicy: Dynamic
+        containerPort: 7654
+        protocol: TCP
+      template:
+        spec:
+          containers:
+          - name: simple-node-app
+            image: [eu.]gcr.io/[GCP-PROJECT]/simple-node-app
+```
