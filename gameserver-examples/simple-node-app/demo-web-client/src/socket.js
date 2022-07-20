@@ -8,7 +8,8 @@ export const createSocket = async (path, alias, messageCallback) => {
     socket = io(path, {
       auth: {
         token: alias
-      }
+      },
+      transports: ['websocket']
     })
   
     socket.on('connect', () => {
