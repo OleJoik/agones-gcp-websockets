@@ -66,20 +66,23 @@
           border-top: 2px solid rgba(0, 0, 0, 0.125);
         ">
         <li 
+          v-if="messages.length>0"
           class="list-group-item"
           v-for="item in messages"
         >
-          <span>
-            {{item.alias}}:
-          </span>
+          {{item.alias}}:
           <br>
-          <span>
-            {{ item.message }}
-          </span>
+          {{ item.message }}
+        </li>
+        <li
+          v-else
+          class="list-group-item"
+        >
+          Start the conversation...
         </li>
       </ul>
 
-      <form @submit.prevent="sendMessage" v-if="connected">
+      <form @submit.prevent="sendMessageTriggered" v-if="connected">
         <div class="input-group input-group-lg pb-3">
           <input type="text" class="form-control" v-model="messageInput">
           <span class="input-group-text">
@@ -91,29 +94,16 @@
 </template>
 
 <script setup>
-import { createSocket } from './socket';
+import { createSocket, sendMessage, disconnectSocket } from './socket';
 import {ref, onMounted, watchEffect, computed} from 'vue'
 
+const messageElement = ref(null);
 const connected = ref(false);
-const socket = ref(null);
 const socketProtocol = ref('wss:')
-const gameServerDomain = ref("localhost:7654")
-const alias = ref("testName");
+const gameServerDomain = ref(null)
+const alias = ref(null);
 const messageInput = ref(null);
-
-const messages = ref([
-  {
-    alias: "Ole",
-    message: "Old message 1 Lorem ipsum dolor sit amet, consectetur adipiscing elit. Proin justo purus, iaculis eu sagittis ultrices, bibendum ut diam. Sed augue tortor, sagittis eu mollis a, varius eget metus. In tincidunt auctor tortor. Phasellus sit amet consectetur libero. Nam viverra sollicitudin purus, in venenatis lectus. In arcu mi, congue nec posuere."
-  },
-  {
-    alias: "Henrik",
-    message: "Old message 2 Lorem ipsum dolor sit amet, consectetur adipiscing elit. Proin justo purus, iaculis eu sagittis ultrices, bibendum ut diam. Sed augue tortor, sagittis eu mollis a, varius eget metus. In tincidunt auctor tortor. Phasellus sit amet consectetur libero. Nam viverra sollicitudin purus, in venenatis lectus. In arcu mi, congue nec posuere."
-  },
-  {
-    alias: "Kåre",
-    message: "Old message 3 Lorem ipsum dolor sit amet, consectetur adipiscing elit. Proin justo purus, iaculis eu sagittis ultrices, bibendum ut diam. Sed augue tortor, sagittis eu mollis a, varius eget metus. In tincidunt auctor tortor. Phasellus sit amet consectetur libero. Nam viverra sollicitudin purus, in venenatis lectus. In arcu mi, congue nec posuere."
-  }])
+const messages = ref([])
 
 onMounted(() => {
   console.log("location.protocol", location.protocol)
@@ -123,12 +113,13 @@ onMounted(() => {
 })
 
 const scrollToBottom = () => {
+  if(messageElement.value)
   messageElement.value.scrollTop = messageElement.value.scrollHeight;
 }
 
 watchEffect(() => {
   if(messages.value.length === 0) return;
-  // scrollToBottom();
+  scrollToBottom();
 })
 
 const buttonText = computed(() => {
@@ -146,11 +137,16 @@ const connectClicked = () => {
   else disconnect();
 }
 
-const connect = () => {
+const connect = async () => {
   // if(!this.validateUrl()) return;
   if(!validateAlias()) return;
 
-  socket.value = createSocket(webSocketHost.value, alias.value) 
+  messages.value = await createSocket(
+    webSocketHost.value, alias.value,
+    (alias, message) => {
+      messages.value.push({alias, message})
+    }
+  )
 
   connected.value = true;
 }
@@ -160,29 +156,24 @@ const disconnect = () => {
   alias.value = null;
   gameServerDomain.value = null;
   connected.value = false;
+  disconnectSocket()
 }
 
-const sendMessage = () => {
-  socket.value.send(JSON.stringify({
-    alias: alias.value,
-    message: messageInput.value
-  }))
-
+const sendMessageTriggered = () => {
+  sendMessage(alias.value, messageInput.value)
   messageInput.value = null;
 }
 
-const validateUrl = () => {
-  let valid = /^[a-zA-Z0-9-]+\.[a-zA-Z0-9\d-]+\.[a-z]+$/.test(gameServerDomain.value || "")
-  if(!valid) alert("Not a valid game server URL")
+// const validateUrl = () => {
+//   let valid = /^[a-zA-Z0-9-]+\.[a-zA-Z0-9\d-]+\.[a-z]+$/.test(gameServerDomain.value || "")
+//   if(!valid) alert("Not a valid game server URL")
 
-  return valid;
-}
+//   return valid;
+// }
 
 const validateAlias = () => {
   let valid = /^[a-zA-Z]\w*$/.test(alias.value || "")
   if(!valid) alert("Not a valid alias.")
-
-  console.log("alias: ", alias.value, ", valid:", valid);
 
   return valid;
 }
