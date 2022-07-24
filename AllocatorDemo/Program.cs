@@ -6,7 +6,7 @@ string clientKey    = File.ReadAllText(@"C:\Users\oleja\repos\agones-gcp-websock
 string clientCert   = File.ReadAllText(@"C:\Users\oleja\repos\agones-gcp-websockets\AllocatorDemo\client.crt");
 string serverCa     = File.ReadAllText(@"C:\Users\oleja\repos\agones-gcp-websockets\AllocatorDemo\ca.crt");
 
-string externalIp   = "35.228.9.67";
+string externalIp   = "34.88.33.121";
 string namespaceArg = "default";
 bool   multicluster = false;
 
